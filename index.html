@@ -69,15 +69,38 @@ if (window.innerWidth && window.innerHeight) {
         return  (Math.abs(s_x-f_x)<=tolerance && Math.abs(s_y-f_y) <= tolerance);
       }
 
-      function test_and_complete(shape,frame,msg) {
+      function test_and_complete(shape,frame,msg,cb) {
         if (isposmatch(shape,frame)) {
+          writeMessage(messageLayer, msg);
+
           shape.setPosition(frame.getAbsolutePosition().x,frame.getAbsolutePosition().y);
           shape.setDraggable(false);
           shapeLayer.draw();
-          writeMessage(messageLayer, msg);
+
+          frame.hide();
+
+          //console.log(shape.toJSON());
+          //console.log(shape.toObject().shapeType);
+          var config={};
+          config.scale = { x: 2, y: 2 };
+          config.opacity = 0;
+          config.duration = 0.8;
+          config.easing = 'ease-out';
+          if (shape.toObject().shapeType=="Rect") {
+            config.x=shape.getAbsolutePosition().x-(shape.getWidth()/2);
+            config.y=shape.getAbsolutePosition().y-(shape.getHeight()/2);
+          }
+
+          shape.transitionTo(config);
           setTimeout(function() {messageLayer.clear();},2000);
+
+          if (cb) return cb();
         }
       }
+
+      // TODO: location of frames cannot conflict
+      // TODO: shapes should not be out of bound (edge of canvas) 
+      // TODO: check when all shapes have matched
 
       var circle = new Kinetic.Circle({
         x: Math.random() * stage.getWidth(),
