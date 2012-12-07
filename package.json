@@ -2,6 +2,6 @@
     "name": "matchshapes"
   , "version": "0.0.1"
   , "dependencies": {
-      "connect": "*"
+      "connect": "2.7.1"
   }
 }
