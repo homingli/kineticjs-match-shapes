@@ -11,14 +11,21 @@
     writeMessage(timerLayer,'Timer: '+(Math.round(((new Date()).getTime()-start)/100)/10)+'s')
   ), 100
   ###
-  
+ 
+  color={'circle':'red','box':"#00D2FF",'triangle':'yellow'}
 
-  writeMessage = (messageLayer, message) ->
+  writeMessage = (messageLayer, message, c) ->
+    c = "black" if (typeof c == 'undefined')
+    ###
     context = messageLayer.getContext()
     messageLayer.clear()
     context.font = "18pt Calibri"
-    context.fillStyle = "black"
+    context.fillStyle = c
     context.fillText message, 10, 25
+    ###
+    msg.setText message
+    msg.setTextFill c
+    messageLayer.draw()
 
   makeframe = (shape) ->
     frame = shape.clone()
@@ -58,7 +65,7 @@
   # function to check if shape is correct
   test_and_complete = (shape, frame, msg, cb) ->
     if isposmatch(shape, frame)
-      writeMessage messageLayer, msg
+      writeMessage messageLayer, msg, shape.getFill()
       shape.setPosition frame.getAbsolutePosition().x, frame.getAbsolutePosition().y
       shape.setDraggable false
       shapeLayer.draw()
@@ -79,10 +86,16 @@
         config.y = shape.getAbsolutePosition().y - (shape.getHeight() / 2)
       shape.transitionTo config
       setTimeout (->
-        messageLayer.clear()
-        alert 'All Done! Win!' if (not circleFrame.isVisible() and not boxFrame.isVisible() and not triangleFrame.isVisible())
+        if (not circleFrame.isVisible() and not boxFrame.isVisible() and not triangleFrame.isVisible())
+          writeMessage messageLayer, 'Congrats! All Done! Win!'
+          # blink effect, omg!!!!
+          setInterval (->
+            if (messageLayer.isVisible())
+              messageLayer.hide()
+            else
+              messageLayer.show()
+          ), 500
       ), 1000
-
 
       cb()  if cb
 
@@ -105,24 +118,25 @@
   )
   shapeLayer = new Kinetic.Layer()
   messageLayer = new Kinetic.Layer()
-  timerLayer = new Kinetic.Layer()
-  tolerance = 10
+  #timerLayer = new Kinetic.Layer()
+  tolerance = 50
   
   circle = new Kinetic.Circle(
     x: Math.random() * stage.getWidth()
     y: Math.random() * stage.getHeight()
-    radius: Math.max(70, Math.random() * 100)
-    fill: "red"
+    radius: Math.max(80, Math.random() * 100)
+    fill: color.circle
     stroke: "black"
     strokeWidth: 2
     draggable: true
   )
+  box_w=box_h=Math.max(150, Math.random() * 180)
   box = new Kinetic.Rect(
     x: Math.random() * stage.getWidth()
     y: Math.random() * stage.getHeight()
-    width: 100
-    height: 100
-    fill: "#00D2FF"
+    width: box_w
+    height: box_h
+    fill: color.box
     stroke: "black"
     strokeWidth: 2
     draggable: true
@@ -131,9 +145,9 @@
     x: Math.random() * stage.getWidth()
     y: Math.random() * stage.getHeight()
     sides: 3
-    radius: Math.max(70, Math.random() * 100)
+    radius: Math.max(100, Math.random() * 130)
     stroke: "black"
-    fill: "yellow"
+    fill: color.triangle
     strokeWidth: 2
     draggable: true
   )
@@ -154,6 +168,15 @@
 
   triangle.on "dragend", ->
     test_and_complete this, triangleFrame, "TRIANGLE MATCHED!"
+  
+  msg = new Kinetic.Text(
+    x: 10,
+    y: 10,
+    text: '',
+    fontSize: 30,
+    fontFamily: 'Calibri',
+    textFill: 'green'
+  )
 
   shapeLayer.add circleFrame
   shapeLayer.add triangleFrame
@@ -161,9 +184,11 @@
   shapeLayer.add circle
   shapeLayer.add triangle
   shapeLayer.add box
+  messageLayer.add msg
+
   stage.add shapeLayer
   stage.add messageLayer
-  stage.add timerLayer
+  #stage.add timerLayer
 
 
 )()

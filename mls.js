@@ -9,14 +9,27 @@
       ), 100
     */
 
-    var box, boxFrame, circle, circleFrame, isposmatch, makeframe, messageLayer, shapeLayer, stage, test_and_complete, timerLayer, tolerance, triangle, triangleFrame, winH, winW, writeMessage;
-    writeMessage = function(messageLayer, message) {
-      var context;
-      context = messageLayer.getContext();
-      messageLayer.clear();
-      context.font = "18pt Calibri";
-      context.fillStyle = "black";
-      return context.fillText(message, 10, 25);
+    var box, boxFrame, box_h, box_w, circle, circleFrame, color, isposmatch, makeframe, messageLayer, msg, shapeLayer, stage, test_and_complete, tolerance, triangle, triangleFrame, winH, winW, writeMessage;
+    color = {
+      'circle': 'red',
+      'box': "#00D2FF",
+      'triangle': 'yellow'
+    };
+    writeMessage = function(messageLayer, message, c) {
+      if (typeof c === 'undefined') {
+        c = "black";
+      }
+      /*
+          context = messageLayer.getContext()
+          messageLayer.clear()
+          context.font = "18pt Calibri"
+          context.fillStyle = c
+          context.fillText message, 10, 25
+      */
+
+      msg.setText(message);
+      msg.setTextFill(c);
+      return messageLayer.draw();
     };
     makeframe = function(shape) {
       var debug_counter, flag, frame, h, new_x, new_y, over_upper, under_lower, w;
@@ -53,7 +66,7 @@
     test_and_complete = function(shape, frame, msg, cb) {
       var config;
       if (isposmatch(shape, frame)) {
-        writeMessage(messageLayer, msg);
+        writeMessage(messageLayer, msg, shape.getFill());
         shape.setPosition(frame.getAbsolutePosition().x, frame.getAbsolutePosition().y);
         shape.setDraggable(false);
         shapeLayer.draw();
@@ -72,9 +85,15 @@
         }
         shape.transitionTo(config);
         setTimeout((function() {
-          messageLayer.clear();
           if (!circleFrame.isVisible() && !boxFrame.isVisible() && !triangleFrame.isVisible()) {
-            return alert('All Done! Win!');
+            writeMessage(messageLayer, 'Congrats! All Done! Win!');
+            return setInterval((function() {
+              if (messageLayer.isVisible()) {
+                return messageLayer.hide();
+              } else {
+                return messageLayer.show();
+              }
+            }), 500);
           }
         }), 1000);
         if (cb) {
@@ -103,23 +122,23 @@
     });
     shapeLayer = new Kinetic.Layer();
     messageLayer = new Kinetic.Layer();
-    timerLayer = new Kinetic.Layer();
-    tolerance = 10;
+    tolerance = 50;
     circle = new Kinetic.Circle({
       x: Math.random() * stage.getWidth(),
       y: Math.random() * stage.getHeight(),
-      radius: Math.max(70, Math.random() * 100),
-      fill: "red",
+      radius: Math.max(80, Math.random() * 100),
+      fill: color.circle,
       stroke: "black",
       strokeWidth: 2,
       draggable: true
     });
+    box_w = box_h = Math.max(150, Math.random() * 180);
     box = new Kinetic.Rect({
       x: Math.random() * stage.getWidth(),
       y: Math.random() * stage.getHeight(),
-      width: 100,
-      height: 100,
-      fill: "#00D2FF",
+      width: box_w,
+      height: box_h,
+      fill: color.box,
       stroke: "black",
       strokeWidth: 2,
       draggable: true
@@ -128,9 +147,9 @@
       x: Math.random() * stage.getWidth(),
       y: Math.random() * stage.getHeight(),
       sides: 3,
-      radius: Math.max(70, Math.random() * 100),
+      radius: Math.max(100, Math.random() * 130),
       stroke: "black",
-      fill: "yellow",
+      fill: color.triangle,
       strokeWidth: 2,
       draggable: true
     });
@@ -146,15 +165,23 @@
     triangle.on("dragend", function() {
       return test_and_complete(this, triangleFrame, "TRIANGLE MATCHED!");
     });
+    msg = new Kinetic.Text({
+      x: 10,
+      y: 10,
+      text: '',
+      fontSize: 30,
+      fontFamily: 'Calibri',
+      textFill: 'green'
+    });
     shapeLayer.add(circleFrame);
     shapeLayer.add(triangleFrame);
     shapeLayer.add(boxFrame);
     shapeLayer.add(circle);
     shapeLayer.add(triangle);
     shapeLayer.add(box);
+    messageLayer.add(msg);
     stage.add(shapeLayer);
-    stage.add(messageLayer);
-    return stage.add(timerLayer);
+    return stage.add(messageLayer);
   })();
 
 }).call(this);
