@@ -1,7 +1,11 @@
 {
     "name": "matchshapes"
   , "version": "0.0.1"
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
+  }
   , "dependencies": {
-      "connect": "2.7.1"
+      "connect": "*"
   }
 }
