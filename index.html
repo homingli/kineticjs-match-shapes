@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+<title>Match Le Shape</title>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.1.2.js"></script>
+    <script>
+
+(function() {
+var winW = 630, winH = 460;
+if (document.body && document.body.offsetWidth) {
+ winW = document.body.offsetWidth;
+ winH = document.body.offsetHeight;
+}
+if (document.compatMode=='CSS1Compat' &&
+    document.documentElement &&
+    document.documentElement.offsetWidth ) {
+ winW = document.documentElement.offsetWidth;
+ winH = document.documentElement.offsetHeight;
+}
+if (window.innerWidth && window.innerHeight) {
+ winW = window.innerWidth;
+ winH = window.innerHeight;
+}
+
+      var stage = new Kinetic.Stage({
+        container: 'container',
+        width: winW,
+        height: winH 
+      });
+
+      function writeMessage(messageLayer, message) {
+        var context = messageLayer.getContext();
+        messageLayer.clear();
+        context.font = '18pt Calibri';
+        context.fillStyle = 'black';
+        context.fillText(message, 10, 25);
+      }
+
+      var shapeLayer = new Kinetic.Layer();
+      var messageLayer = new Kinetic.Layer();
+
+      function makeframe(shape) {
+        var frame = shape.clone();
+        frame.setFill("#fff");
+        frame.setDraggable(false);
+        frame.setPosition(Math.random() * stage.getWidth(),Math.random() * stage.getHeight());
+        return frame;
+        console.log(shape.toJSON());
+      }
+
+      var tolerance = 10;
+
+      function isposmatch(shape,frame) {
+        var shape_pos = shape.getAbsolutePosition();
+        var frame_pos = frame.getAbsolutePosition();
+        var s_x = Math.round(shape_pos.x)
+        var s_y = Math.round(shape_pos.y)
+        var f_x = Math.round(frame_pos.x)
+        var f_y = Math.round(frame_pos.y)
+        return  (Math.abs(s_x-f_x)<=tolerance && Math.abs(s_y-f_y) <= tolerance);
+      }
+
+      function test_and_complete(shape,frame,msg) {
+        if (isposmatch(shape,frame)) {
+          shape.setPosition(frame.getAbsolutePosition().x,frame.getAbsolutePosition().y);
+          shape.setDraggable(false);
+          shapeLayer.draw();
+          writeMessage(messageLayer, msg);
+          setTimeout(function() {messageLayer.clear();},2000);
+        }
+      }
+
+      var circle = new Kinetic.Circle({
+        x: Math.random() * stage.getWidth(),
+        y: Math.random() * stage.getHeight(),
+        radius: Math.max(70,Math.random() * 100),
+        fill: 'red',
+        stroke: 'black',
+        strokeWidth: 4,
+        draggable: true
+      });
+
+      var box = new Kinetic.Rect({
+        x: Math.random() * stage.getWidth(),
+        y: Math.random() * stage.getHeight(),
+        width: 100,
+        height:100,
+        fill: '#00D2FF',
+        stroke: 'black',
+        strokeWidth: 4,
+        draggable: true
+      });
+
+
+      var triangle = new Kinetic.RegularPolygon({
+        x: Math.random() * stage.getWidth(),
+        y: Math.random() * stage.getHeight(),
+        sides: 3,
+        radius: Math.max(70,Math.random() * 100),
+        stroke: 'black',
+        fill: 'yellow',
+        strokeWidth: 4,
+        draggable: true
+      });
+
+      var boxFrame = makeframe(box);
+      var circleFrame = makeframe(circle);
+      var triangleFrame = makeframe(triangle);
+
+      // write out drag and drop events
+      /*circle.on('dragstart', function() {
+        writeMessage(messageLayer, 'dragstart');
+      });*/
+
+      circle.on('dragend', function() {
+        test_and_complete(this,circleFrame,'CIRCLE MATCHED!');
+      });
+
+      box.on('dragend', function() {
+        test_and_complete(this,boxFrame,'SQUARE MATCHED!');
+      });
+
+      triangle.on('dragend', function() {
+        test_and_complete(this,triangleFrame,'TRIANGLE MATCHED!');
+      });
+
+      shapeLayer.add(circleFrame);
+      shapeLayer.add(triangleFrame);
+      shapeLayer.add(boxFrame);
+      shapeLayer.add(circle);
+      shapeLayer.add(triangle);
+      shapeLayer.add(box);
+
+      stage.add(shapeLayer);
+      stage.add(messageLayer);
+
+})();
+
+    </script>
+  </body>
+</html>
