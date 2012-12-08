@@ -9,7 +9,7 @@
       ), 100
     */
 
-    var box, boxFrame, box_h, box_w, circle, circleFrame, color, isposmatch, makeframe, messageLayer, msg, shapeLayer, stage, test_and_complete, tolerance, triangle, triangleFrame, winH, winW, writeMessage;
+    var box, boxFrame, box_h, box_w, box_x, box_y, circle, circleFrame, color, isposmatch, makeframe, messageLayer, msg, shapeLayer, stage, test_and_complete, tolerance, triangle, triangleFrame, winH, winW, writeMessage;
     color = {
       'circle': 'red',
       'box': "#00D2FF",
@@ -27,8 +27,10 @@
           context.fillText message, 10, 25
       */
 
-      msg.setText(message);
       msg.setTextFill(c);
+      msg.setTextStroke('black');
+      msg.setTextStrokeWidth(1);
+      msg.setText(message);
       return messageLayer.draw();
     };
     makeframe = function(shape) {
@@ -66,6 +68,7 @@
     test_and_complete = function(shape, frame, msg, cb) {
       var config;
       if (isposmatch(shape, frame)) {
+        new Audio("applause.mp3").play();
         writeMessage(messageLayer, msg, shape.getFill());
         shape.setPosition(frame.getAbsolutePosition().x, frame.getAbsolutePosition().y);
         shape.setDraggable(false);
@@ -86,6 +89,7 @@
         shape.transitionTo(config);
         setTimeout((function() {
           if (!circleFrame.isVisible() && !boxFrame.isVisible() && !triangleFrame.isVisible()) {
+            new Audio("tada.mp3").play();
             writeMessage(messageLayer, 'Congrats! All Done! Win!');
             return setInterval((function() {
               if (messageLayer.isVisible()) {
@@ -133,9 +137,11 @@
       draggable: true
     });
     box_w = box_h = Math.max(150, Math.random() * 180);
+    box_x = Math.random() * stage.getWidth();
+    box_y = Math.random() * stage.getHeight();
     box = new Kinetic.Rect({
-      x: Math.random() * stage.getWidth(),
-      y: Math.random() * stage.getHeight(),
+      x: box_x,
+      y: box_y,
       width: box_w,
       height: box_h,
       fill: color.box,

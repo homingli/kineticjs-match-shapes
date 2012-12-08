@@ -11,7 +11,7 @@
     writeMessage(timerLayer,'Timer: '+(Math.round(((new Date()).getTime()-start)/100)/10)+'s')
   ), 100
   ###
- 
+
   color={'circle':'red','box':"#00D2FF",'triangle':'yellow'}
 
   writeMessage = (messageLayer, message, c) ->
@@ -23,8 +23,10 @@
     context.fillStyle = c
     context.fillText message, 10, 25
     ###
-    msg.setText message
     msg.setTextFill c
+    msg.setTextStroke 'black'
+    msg.setTextStrokeWidth 1
+    msg.setText message
     messageLayer.draw()
 
   makeframe = (shape) ->
@@ -65,6 +67,8 @@
   # function to check if shape is correct
   test_and_complete = (shape, frame, msg, cb) ->
     if isposmatch(shape, frame)
+
+      new Audio("applause.mp3").play()
       writeMessage messageLayer, msg, shape.getFill()
       shape.setPosition frame.getAbsolutePosition().x, frame.getAbsolutePosition().y
       shape.setDraggable false
@@ -87,6 +91,8 @@
       shape.transitionTo config
       setTimeout (->
         if (not circleFrame.isVisible() and not boxFrame.isVisible() and not triangleFrame.isVisible())
+          # http://soundbible.com/1003-Ta-Da.html
+          new Audio("tada.mp3").play()
           writeMessage messageLayer, 'Congrats! All Done! Win!'
           # blink effect, omg!!!!
           setInterval (->
@@ -130,10 +136,15 @@
     strokeWidth: 2
     draggable: true
   )
+  
   box_w=box_h=Math.max(150, Math.random() * 180)
+
+  box_x=Math.random() * stage.getWidth()
+  box_y=Math.random() * stage.getHeight()
+
   box = new Kinetic.Rect(
-    x: Math.random() * stage.getWidth()
-    y: Math.random() * stage.getHeight()
+    x: box_x
+    y: box_y
     width: box_w
     height: box_h
     fill: color.box
