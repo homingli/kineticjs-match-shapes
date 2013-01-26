@@ -3,12 +3,17 @@
   <head>
 <title>Match Le Shape</title>
     <style>
-      body { margin: 0px; padding: 0px; }
+      body { margin: 0px; padding: 0px; background: url(http://subtlepatterns.subtlepatterns.netdna-cdn.com/patterns/billie_holiday.png)}
+      #reset { position: absolute; z-index: 999 }
+      a {text-decoration: none; color: #000}
     </style>
   </head>
   <body>
+    <!-- reset not working on firefox -->
+    <div id="reset"><button><a href="javascript:reset()">Reset</a></button></div>
     <div id="container"></div>
     <script src="kinetic-v4.1.2.js"></script>
     <script src="mls.js"></script>
+    <script> <!-- function reset() { location.href=location.origin+'?'+Date.parse(new Date()); } --> </script>
   </body>
 </html>

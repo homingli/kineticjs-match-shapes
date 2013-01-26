@@ -1,0 +1,14 @@
+{
+  "name": "Match LeShapes",
+  "description": "Shape-matching game for kids",
+  "launch_path": "/",
+  "icons": {
+    "128": "/img/icon-128.png"
+  },
+  "developer": {
+    "name": "Ho Ming Li",
+    "url": "http://homingli.com"
+  },
+  "version": "0.0.1",
+  "default_locale": "en"
+}

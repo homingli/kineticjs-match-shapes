@@ -2,6 +2,26 @@
 (function() {
 
   (function() {
+    var box, boxFrame, box_h, box_w, circle, circleFrame, findBounds, isposmatch, makeframe, messageLayer, msg, shapeLayer, shapes, stage, test_and_complete, tolerance, triangle, triangleFrame, winH, winW, writeMessage;
+    winW = 630;
+    winH = 460;
+    if (document.body && document.body.offsetWidth) {
+      winW = document.body.offsetWidth;
+      winH = document.body.offsetHeight;
+    }
+    if (document.compatMode === "CSS1Compat" && document.documentElement && document.documentElement.offsetWidth) {
+      winW = document.documentElement.offsetWidth;
+      winH = document.documentElement.offsetHeight;
+    }
+    if (window.innerWidth && window.innerHeight) {
+      winW = window.innerWidth;
+      winH = window.innerHeight;
+    }
+    stage = new Kinetic.Stage({
+      container: "container",
+      width: winW,
+      height: winH
+    });
     /*
       start= (new Date()).getTime()
       setInterval (->
@@ -9,11 +29,22 @@
       ), 100
     */
 
-    var box, boxFrame, box_h, box_w, box_x, box_y, circle, circleFrame, color, isposmatch, makeframe, messageLayer, msg, shapeLayer, stage, test_and_complete, tolerance, triangle, triangleFrame, winH, winW, writeMessage;
-    color = {
-      'circle': 'red',
-      'box': "#00D2FF",
-      'triangle': 'yellow'
+    shapes = {
+      'circle': {
+        'color': 'red',
+        'x': Math.random() * stage.getWidth(),
+        'y': Math.random() * stage.getHeight()
+      },
+      'box': {
+        'color': "#00D2FF",
+        'x': Math.random() * stage.getWidth(),
+        'y': Math.random() * stage.getHeight()
+      },
+      'triangle': {
+        'color': "yellow",
+        'x': Math.random() * stage.getWidth(),
+        'y': Math.random() * stage.getHeight()
+      }
     };
     writeMessage = function(messageLayer, message, c) {
       if (typeof c === 'undefined') {
@@ -34,26 +65,53 @@
       return messageLayer.draw();
     };
     makeframe = function(shape) {
-      var debug_counter, flag, frame, h, new_x, new_y, over_upper, under_lower, w;
+      var frame, h, new_x, new_y, w;
       frame = shape.clone();
-      frame.setFill("#fff");
+      frame.setFill("#000");
       frame.setDraggable(false);
-      debug_counter = 0;
-      flag = true;
-      while (flag) {
-        new_x = Math.random() * stage.getWidth();
-        new_y = Math.random() * stage.getHeight();
-        if (frame.toObject().shapeType === "Rect") {
-          w = frame.getWidth();
-          h = frame.getHeight();
-        } else {
-          w = h = frame.getRadius();
-        }
-        over_upper = (new_x + w > stage.getWidth()) || (new_y + h > stage.getHeight());
-        under_lower = (new_x - w < 0) || (new_y - h < 0);
-        flag = over_upper || under_lower;
-        console.log(++debug_counter);
+      new_x = Math.random() * stage.getWidth();
+      new_y = Math.random() * stage.getHeight();
+      if (frame.toObject().shapeType === "Rect") {
+        w = frame.getWidth();
+        h = frame.getHeight();
+      } else {
+        w = h = frame.getRadius();
       }
+      if (new_x + w > stage.getWidth()) {
+        new_x = new_x - w;
+      }
+      if (new_y + h > stage.getHeight()) {
+        new_y = new_y - h;
+      }
+      if (new_x - w < 0) {
+        new_x = new_x + w;
+      }
+      if (new_y - h < 0) {
+        new_y = new_y + h;
+      }
+      /*
+          debug_counter = 0
+          flag = true
+          while flag
+            new_x = Math.random() * stage.getWidth()
+            new_y = Math.random() * stage.getHeight()
+            if frame.toObject().shapeType is "Rect"
+              w = frame.getWidth()
+              h = frame.getHeight()
+            else
+              w = h = frame.getRadius()
+      
+            # check upperbound
+            over_upper = ((new_x + w > stage.getWidth()) or (new_y + h > stage.getHeight()))
+      
+            # check lowerbound
+            under_lower = ((new_x - w < 0) or (new_y - h < 0))
+            flag = (over_upper or under_lower)
+            console.log ++debug_counter
+          # endwhile
+      */
+
+      console.log(frame.toObject().shapeType, new_x, new_y);
       frame.setPosition(new_x, new_y);
       return frame;
     };
@@ -71,26 +129,32 @@
         new Audio("applause.mp3").play();
         writeMessage(messageLayer, msg, shape.getFill());
         shape.setPosition(frame.getAbsolutePosition().x, frame.getAbsolutePosition().y);
-        shape.setDraggable(false);
         shapeLayer.draw();
-        frame.hide();
         config = {};
         config.scale = {
-          x: 2,
-          y: 2
+          x: 0,
+          y: 0
         };
         config.opacity = 0;
-        config.duration = 0.8;
+        config.duration = 0.5;
         config.easing = "ease-out";
+        frame.hide();
         if (shape.toObject().shapeType === "Rect") {
-          config.x = shape.getAbsolutePosition().x - (shape.getWidth() / 2);
-          config.y = shape.getAbsolutePosition().y - (shape.getHeight() / 2);
+          config.x = shape.getAbsolutePosition().x + (shape.getWidth() / 2);
+          config.y = shape.getAbsolutePosition().y + (shape.getHeight() / 2);
         }
         shape.transitionTo(config);
         setTimeout((function() {
           if (!circleFrame.isVisible() && !boxFrame.isVisible() && !triangleFrame.isVisible()) {
             new Audio("tada.mp3").play();
-            writeMessage(messageLayer, 'Congrats! All Done! Win!');
+            writeMessage(messageLayer, 'Congrats! All Done!');
+            circleFrame.setFill(shapes.circle.color);
+            circleFrame.show();
+            boxFrame.setFill(shapes.box.color);
+            boxFrame.show();
+            triangleFrame.setFill(shapes.triangle.color);
+            triangleFrame.show();
+            stage.draw();
             return setInterval((function() {
               if (messageLayer.isVisible()) {
                 return messageLayer.hide();
@@ -105,87 +169,120 @@
         }
       }
     };
-    winW = 630;
-    winH = 460;
-    if (document.body && document.body.offsetWidth) {
-      winW = document.body.offsetWidth;
-      winH = document.body.offsetHeight;
-    }
-    if (document.compatMode === "CSS1Compat" && document.documentElement && document.documentElement.offsetWidth) {
-      winW = document.documentElement.offsetWidth;
-      winH = document.documentElement.offsetHeight;
-    }
-    if (window.innerWidth && window.innerHeight) {
-      winW = window.innerWidth;
-      winH = window.innerHeight;
-    }
-    stage = new Kinetic.Stage({
-      container: "container",
-      width: winW,
-      height: winH
-    });
     shapeLayer = new Kinetic.Layer();
     messageLayer = new Kinetic.Layer();
     tolerance = 50;
     circle = new Kinetic.Circle({
-      x: Math.random() * stage.getWidth(),
-      y: Math.random() * stage.getHeight(),
-      radius: Math.max(80, Math.random() * 100),
-      fill: color.circle,
+      x: shapes.circle.x,
+      y: shapes.circle.y,
+      radius: Math.max(100, Math.random() * stage.getWidth() / 8),
+      fill: shapes.circle.color,
       stroke: "black",
       strokeWidth: 2,
       draggable: true
     });
-    box_w = box_h = Math.max(150, Math.random() * 180);
-    box_x = Math.random() * stage.getWidth();
-    box_y = Math.random() * stage.getHeight();
+    box_w = box_h = Math.max(150, Math.random() * stage.getWidth() / 6);
     box = new Kinetic.Rect({
-      x: box_x,
-      y: box_y,
+      x: shapes.box.x,
+      y: shapes.box.y,
       width: box_w,
       height: box_h,
-      fill: color.box,
+      fill: shapes.box.color,
+      rotationDeg: Math.random() * 180,
       stroke: "black",
       strokeWidth: 2,
       draggable: true
     });
     triangle = new Kinetic.RegularPolygon({
-      x: Math.random() * stage.getWidth(),
-      y: Math.random() * stage.getHeight(),
+      x: shapes.triangle.x,
+      y: shapes.triangle.y,
       sides: 3,
-      radius: Math.max(100, Math.random() * 130),
+      radius: Math.max(120, Math.random() * stage.getWidth() / 8),
       stroke: "black",
-      fill: color.triangle,
+      fill: shapes.triangle.color,
+      rotationDeg: Math.random() * 120,
       strokeWidth: 2,
       draggable: true
     });
     boxFrame = makeframe(box);
     circleFrame = makeframe(circle);
     triangleFrame = makeframe(triangle);
-    circle.on("dragend", function() {
-      return test_and_complete(this, circleFrame, "CIRCLE MATCHED!");
-    });
-    box.on("dragend", function() {
-      return test_and_complete(this, boxFrame, "SQUARE MATCHED!");
-    });
-    triangle.on("dragend", function() {
-      return test_and_complete(this, triangleFrame, "TRIANGLE MATCHED!");
-    });
     msg = new Kinetic.Text({
       x: 10,
-      y: 10,
+      y: stage.getHeight() / 2,
       text: '',
-      fontSize: 30,
+      align: 'center',
+      fontSize: 64,
       fontFamily: 'Calibri',
       textFill: 'green'
     });
+    circle.on("dragstart", function() {
+      this.moveToTop();
+      return writeMessage(messageLayer, "CIRCLE", this.getFill());
+      /*
+          this.setAttrs {
+            shadow: { offset: { x: 5, y: 5 } }
+            scale: { x: 1.1, y: 1.1 }
+          }
+      */
+
+    });
+    circle.on("touchend dragend", function() {
+      /*
+          this.setAttrs {
+            shadow: { offset: { x: 0, y: 0 } }
+            scale: { x: 1, y: 1 }
+          }
+          shapeLayer.draw()
+      */
+      return test_and_complete(this, circleFrame, "CIRCLE");
+    });
+    box.on("dragstart", function() {
+      this.moveToTop();
+      return writeMessage(messageLayer, "SQUARE", this.getFill());
+    });
+    box.on("touchend dragend", function() {
+      return test_and_complete(this, boxFrame, "SQUARE");
+    });
+    triangle.on("dragstart", function() {
+      this.moveToTop();
+      return writeMessage(messageLayer, "TRIANGLE", this.getFill());
+    });
+    triangle.on("touchend dragend", function() {
+      return test_and_complete(this, triangleFrame, "TRIANGLE");
+    });
+    findBounds = function(shape) {
+      var s_h, s_r, s_w, x_lower, x_upper, y_lower, y_upper;
+      if (shape.toObject().shapeType === "Rect") {
+        s_w = shape.getWidth();
+        s_h = shape.getHeight();
+        x_upper = shape.getX() + s_w / 2;
+        x_lower = shape.getX() - s_w / 2;
+        y_upper = shape.getY() + s_h / 2;
+        y_lower = shape.getY() - s_h / 2;
+      } else {
+        s_r = shape.getRadius();
+        x_upper = shape.getX() + s_r;
+        x_lower = shape.getX() - s_r;
+        y_upper = shape.getY() + s_r;
+        y_lower = shape.getY() - s_r;
+      }
+      return {
+        x: [x_lower, x_upper],
+        y: [y_lower, y_upper]
+      };
+    };
+    circleFrame.bounds = findBounds(circleFrame);
+    triangleFrame.bounds = findBounds(triangleFrame);
+    boxFrame.bounds = findBounds(boxFrame);
+    messageLayer.add(msg);
     shapeLayer.add(circleFrame);
     shapeLayer.add(triangleFrame);
     shapeLayer.add(boxFrame);
     shapeLayer.add(circle);
     shapeLayer.add(triangle);
     shapeLayer.add(box);
-    messageLayer.add(msg);
+    stage.clear();
     stage.add(shapeLayer);
     return stage.add(messageLayer);
   })();
