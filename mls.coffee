@@ -10,6 +10,7 @@
 
 (->
 
+  tolerance = 50
 
   # find window width and height
   winW = 630
@@ -64,9 +65,9 @@
     context.fillStyle = c
     context.fillText message, 10, 25
     ###
-    msg.setTextFill c
-    msg.setTextStroke 'black'
-    msg.setTextStrokeWidth 1
+    msg.setFill c
+    msg.setStroke 'black'
+    msg.setStrokeWidth 1
     msg.setText message
     messageLayer.draw()
 
@@ -76,7 +77,7 @@
     frame.setDraggable false
     new_x = Math.random() * stage.getWidth()
     new_y = Math.random() * stage.getHeight()
-    if frame.toObject().shapeType is "Rect"
+    if frame.toObject().className is "Rect"
       w = frame.getWidth()
       h = frame.getHeight()
     else
@@ -91,12 +92,13 @@
     new_y = new_y + h if (new_y - h < 0)
 
     ###
+    # old style = recreate shape
     debug_counter = 0
     flag = true
     while flag
       new_x = Math.random() * stage.getWidth()
       new_y = Math.random() * stage.getHeight()
-      if frame.toObject().shapeType is "Rect"
+      if frame.toObject().className is "Rect"
         w = frame.getWidth()
         h = frame.getHeight()
       else
@@ -111,11 +113,11 @@
       console.log ++debug_counter
     # endwhile
     ###
-   
-    console.log frame.toObject().shapeType,new_x,new_y
+  
+    # new way = move shape (frame) inside stage
+    console.log frame.toObject().className,new_x,new_y
     frame.setPosition new_x, new_y
     frame
-
 
   # check matching position
   isposmatch = (shape, frame) ->
@@ -136,21 +138,21 @@
       shapeLayer.draw()
       
       #console.log(shape.toJSON());
-      #console.log(shape.toObject().shapeType);
-      config = {}
-      config.scale =
-        x: 0
-        y: 0
-
-      config.opacity = 0
-      config.duration = 0.5
-      config.easing = "ease-out"
-      #config.callback = ->
+      #console.log(shape.toObject().className);
+      tween = new Kinetic.Tween({
+        scaleX: 0
+        opacity: 0
+        duration: 0.5
+        easing: Kinetic.Easings.EaseOut
+        node: shape
+      })
       frame.hide()
-      if shape.toObject().shapeType is "Rect"
+      ###
+      if shape.toObject().className is "Rect"
         config.x = shape.getAbsolutePosition().x + (shape.getWidth() / 2)
         config.y = shape.getAbsolutePosition().y + (shape.getHeight() / 2)
-      shape.transitionTo config
+      ###
+      tween.play()
 
       setTimeout (->
         if (not circleFrame.isVisible() and not boxFrame.isVisible() and not triangleFrame.isVisible())
@@ -182,7 +184,6 @@
   shapeLayer = new Kinetic.Layer()
   messageLayer = new Kinetic.Layer()
   #timerLayer = new Kinetic.Layer()
-  tolerance = 50
 
   circle = new Kinetic.Circle(
     x: shapes.circle.x
@@ -270,7 +271,7 @@
     test_and_complete this, triangleFrame, "TRIANGLE"
   
   findBounds = (shape) ->
-    if shape.toObject().shapeType is "Rect"
+    if shape.toObject().className is "Rect"
       s_w = shape.getWidth()
       s_h = shape.getHeight()
       x_upper = shape.getX() + s_w/2
@@ -304,5 +305,6 @@
   stage.add shapeLayer
   stage.add messageLayer
   #stage.add timerLayer
+
 
 )()
